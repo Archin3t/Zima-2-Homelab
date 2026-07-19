@@ -1,84 +1,414 @@
-# Creation Guide — Homelab Blueprint
+# Creation Guide — ZimaBoard 2 Homelab Blueprint
 
-How to stand up the **hypervisor guests**. App installs are in the media/books repos.
+This guide covers building the **Proxmox foundation**, creating guests, preparing storage, and connecting the platform together.
 
-## 0. Before you start
+Application installation steps are intentionally kept separate and are maintained in the companion repositories.
 
-- [ ] Hypervisor installed (Proxmox VE or equivalent)
-- [ ] Guest storage pool ready
-- [ ] Media disk labeled and mountable by LABEL/by-id
-- [ ] Private notes file for **your** IPs, IDs, and passwords (not in git)
+---
 
-## 1. Create guests (examples)
+# 0. Before You Start
 
-Resource numbers are starting points — adjust for your hardware.
+## Hardware Checklist
 
-### Media player guest
+- [ ] IceWhale ZimaBoard 2 (or compatible x86 system) ready
+- [ ] Display access or SSH access available
+- [ ] Proxmox VE installer prepared
+- [ ] Dedicated media storage disk available
+- [ ] Guest storage pool available
+- [ ] Network connection available
+
+## Planning Checklist
+
+Before installation, prepare a private notes file.
+
+Keep the following private:
+
+- IP addresses
+- Hostnames
+- VM/LXC IDs
+- Passwords
+- API keys
+- Domain names
+- Storage inventory
+
+Do **not** store private infrastructure details inside Git.
+
+---
+
+# 1. Install Proxmox VE
+
+Install Proxmox VE as the foundation of the platform.
+
+## Recommended Layout
+
+| Storage | Purpose |
+|---------|---------|
+| eMMC / Boot SSD | Proxmox operating system only |
+| Larger storage pool | VM/LXC disks, snapshots, backups |
+| Dedicated media disk | Movies, TV, downloads |
+| Dedicated books storage | Books and reading library |
+
+---
+
+## Installation Steps
+
+1. Install Proxmox VE to the boot device.
+
+2. Configure:
+
+   - Strong root password
+   - Network settings
+   - Correct hostname
+   - Time zone
+
+3. Update the Proxmox node.
+
+4. Create or configure guest storage.
+
+5. Confirm the web interface:
+
+```text
+https://<PROXMOX_HOST>:8006
+```
+
+---
+
+# 2. Prepare Media Storage
+
+The media volume stores:
+
+- Movies
+- TV shows
+- Downloads
+- Completed imports
+
+It is shared between:
+
+- Media automation services
+- Jellyfin
+
+---
+
+## Storage Preparation
+
+1. Create the filesystem of your choice.
+
+2. Assign a stable filesystem label.
+
+Example:
+
+```text
+media-library
+```
+
+3. Mount the filesystem on the Proxmox host.
+
+Example:
+
+```text
+/mnt/media
+```
+
+4. Configure persistent mounting.
+
+Preferred methods:
+
+```text
+LABEL=<MEDIA_LABEL>
+```
+
+or:
+
+```text
+/dev/disk/by-id/
+```
+
+Avoid:
+
+```text
+/dev/sdX
+```
+
+Device letters can change after reboot or hardware changes.
+
+---
+
+# 3. Create Guests
+
+The following layout is a recommended starting point.
+
+Adjust resources depending on your hardware and workload.
+
+---
+
+# Media Player — Jellyfin
+
+Purpose:
+
+- Streaming platform
+- Hardware accelerated playback
+- Media library access
 
 | Setting | Example |
-|---|---|
+|---------|---------|
 | Type | LXC (Debian) or VM |
 | vCPU | 2 |
 | RAM | 2–4 GB |
-| Disk | 8–16 GB OS |
-| Extra | Bind-mount media volume read/write; pass `/dev/dri` if using VAAPI |
-| Boot | Auto-start on host boot |
+| OS Disk | 8–16 GB |
+| Storage | Media bind mount |
+| GPU | Optional `/dev/dri` passthrough |
+| Startup | Enable auto-start |
 
-### Media automation guest
+---
+
+## Media Automation — Jellyseerr + *arr + qBittorrent
+
+Purpose:
+
+- Requests
+- Library management
+- Downloads
+- Import automation
+
+Services:
+
+- Jellyseerr
+- Sonarr
+- Radarr
+- Prowlarr
+- qBittorrent
 
 | Setting | Example |
-|---|---|
-| Type | LXC (Debian) with nesting if using Docker |
+|---------|---------|
+| Type | LXC with nesting or VM |
 | vCPU | 2 |
 | RAM | 2–4 GB |
-| Disk | 8–16 GB OS |
-| Extra | **Same** media volume mount as the player (for hardlinks) |
+| OS Disk | 8–16 GB |
+| Storage | Same media mount path as Jellyfin |
 
-### NAS guest (optional)
+Important:
+
+The automation guest and Jellyfin guest should use the same absolute path.
+
+Example:
+
+```text
+/mnt/media
+```
+
+This allows efficient hardlink-based workflows.
+
+---
+
+# Books Platform — Kavita + Calibre-Web Automated + Optional LazyLibrarian
+
+Purpose:
+
+- Book management
+- Reading platform
+- Metadata organization
 
 | Setting | Example |
-|---|---|
+|---------|---------|
+| Type | LXC with nesting or VM |
+| vCPU | 2 |
+| RAM | 2–4 GB |
+| OS Disk | 8–16 GB |
+| Storage | Dedicated books storage |
+
+Important:
+
+The books guest should remain separate from the movie/TV media volume.
+
+Recommended:
+
+```text
+Books Storage
+      |
+      +-- Library
+      +-- Metadata
+      +-- Imports
+```
+
+---
+
+# NAS (Optional)
+
+Purpose:
+
+- Network shares
+- Backup destination
+- File storage
+
+Common deployment:
+
+| Setting | Example |
+|---------|---------|
 | Type | VM |
-| vCPU | 1–2 |
-| RAM | 1–2 GB |
-| OS disk | 16–32 GB |
-| Data | Passthrough or virtio disk for shares |
+| Platform | OpenMediaVault |
+| Storage | Passthrough disk or dedicated data disk |
 
-### Books guest
+See:
 
-| Setting | Example |
-|---|---|
-| Type | LXC with nesting (Docker) or VM |
-| vCPU | 2 |
-| RAM | 2–4 GB |
-| Disk | **64–256 GB** on guest storage (library lives here) |
-| Extra | Do **not** mount the movies/TV volume unless you deliberately want to |
+**[ZimaBoard-NAS](https://github.com/Archin3t/ZimaBoard-NAS)**
 
-## 2. Networking
+for storage and NAS-specific documentation.
 
-1. Attach guests to your LAN bridge.
-2. Set static IPs **you** choose (DHCP reservation or guest static config).
-3. Confirm each guest can reach the others you need (player ↔ automation; automation ↔ download client).
+---
 
-## 3. Media volume
+# 4. Networking
 
-On the host:
+The recommended design uses a standard LAN bridge.
 
-1. Create filesystem; set a stable LABEL.
-2. Mount to a host path of your choosing (example: `/mnt/media`).
-3. Bind-mount into player + automation guests at the **same absolute path** inside both (example: `/data/media`) so hardlinks work.
+Example:
 
-## 4. Next steps
+```text
+Internet
+   |
+Router
+   |
+LAN
+   |
+vmbr0
+   |
++---------+---------+---------+
+|         |         |         |
+Jellyfin  Media     Books     NAS
+Guest     Guest     Guest     Guest
+```
 
-1. Follow **homelab-media-stack** `CREATION-GUIDE.md` on the automation + player guests.
-2. Follow **homelab-books-stack** `CREATION-GUIDE.md` on the books guest.
-3. Store credentials in a password manager (see README FAQ / Homelab notes — recommended: Vaultwarden on LAN).
+---
 
-## 5. Backup sketch
+## Network Checklist
 
-| What | Idea |
-|---|---|
-| Guest configs / disks | Hypervisor backup jobs |
-| Media library | Separate backup — often excluded from guest backups if bind-mounted |
-| Books library | Backup the books guest disk or sync library folder off-box |
-| Secrets | Password manager export / encrypted backup — never plain git |
+Verify:
+
+- [ ] Guests receive network access
+- [ ] Jellyfin can access media storage
+- [ ] Automation can access downloads
+- [ ] Automation can communicate with Jellyfin
+- [ ] Web interfaces load correctly
+
+Use:
+
+- Static IP addresses
+- DHCP reservations
+
+Choose whichever works best for your network.
+
+---
+
+# 5. Install Applications
+
+After the platform is created, continue with the companion repositories.
+
+---
+
+## Media Stack
+
+Repository:
+
+**[ZimaBoard-Media-Stack](https://github.com/Archin3t/ZimaBoard-Media-Stack)**
+
+Covers:
+
+- Jellyfin
+- Jellyseerr
+- Sonarr
+- Radarr
+- Prowlarr
+- qBittorrent
+- Kavita
+- Calibre-Web Automated
+- LazyLibrarian
+
+---
+
+## NAS Platform
+
+Repository:
+
+**[ZimaBoard-NAS](https://github.com/Archin3t/ZimaBoard-NAS)**
+
+Covers:
+
+- OpenMediaVault
+- Storage layouts
+- Disk passthrough
+- Shares
+- Backups
+- Additional services
+
+---
+
+# 6. Backup Strategy
+
+A homelab is only as reliable as its recovery plan.
+
+| Data | Recommended Backup |
+|------|--------------------|
+| Guest disks | Proxmox backup jobs |
+| VM/LXC configuration | Proxmox backups |
+| Media library | Separate backup/sync strategy |
+| Books library | Backup or sync library storage |
+| Secrets | Password manager export |
+
+---
+
+## Important Backup Rules
+
+Never store:
+
+- Passwords
+- API keys
+- Tokens
+- SSH keys
+
+inside Git repositories.
+
+Use:
+
+- Password managers
+- Encrypted backups
+- Private storage
+
+---
+
+# 7. Final Validation Checklist
+
+Before considering the platform complete:
+
+- [ ] Proxmox accessible
+- [ ] Storage mounts survive reboot
+- [ ] Guests start automatically
+- [ ] Jellyfin detects media
+- [ ] Automation imports correctly
+- [ ] Books library scans correctly
+- [ ] Backups tested
+- [ ] Credentials stored securely
+
+---
+
+# Credits & Attribution
+
+Created and maintained by **Archin3t**
+
+This guide represents original documentation, architecture planning, and deployment methodology created for the **ZimaBoard 2 Homelab Blueprint**.
+
+If this guide, structure, diagrams, or documentation are referenced for:
+
+- Videos
+- Articles
+- Blog posts
+- Courses
+- GitHub projects
+- Social media content
+- Educational material
+
+please provide visible credit and a link back to this repository.
+
+Substantial reproduction of this documentation requires permission.
+
+---
+
+© 2026 Archin3t. All Rights Reserved.
