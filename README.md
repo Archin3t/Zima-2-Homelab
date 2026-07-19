@@ -14,8 +14,10 @@ In my case I am utilizing the ZimaBoard 2 1664 based on x86 Architecture. The fo
 
 This repository describes **architecture and roles**. Application install details live in companion repos:
 
-- [homelab-media-stack](https://github.com/Archin3t/homelab-media-stack)
-- [homelab-books-stack](https://github.com/Archin3t/homelab-books-stack)
+| Repository | Purpose |
+|------------|---------|
+| [homelab-media-stack](https://github.com/Archin3t/homelab-media-stack) | Jellyfin, Sonarr, Radarr, qBittorrent, etc. |
+| [homelab-books-stack](https://github.com/Archin3t/homelab-books-stack) | Kavita, Calibre-Web, Audiobookshelf, etc. |
 
 ## Docs
 
