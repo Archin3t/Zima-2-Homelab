@@ -1,20 +1,23 @@
 # Homelab Blueprint
 
 Public documentation for a **small Proxmox-based Homelab**: media streaming, optional NAS, and a separate books/reading stack.
+In my case I am utilizing the ZimaBoard 2 1664 based on x86 Architecture, The following is the contents/specifications of the ZimaBoard 2 1664:
+- | Intel N150 Quad-Core up to 3.6Ghz 16GB LPDDR5 4800Mhz RAM, 64GB eMMC Storage, 2x SATA Ports, 2x 2.5GBe, 2x USB 3.0, 1x Mini DisplayPort |
 
 This repository describes **architecture and roles**. Application install details live in companion repos:
 
-- [homelab-media-stack](https://github.com/EXAMPLE/homelab-media-stack) 
-- [homelab-books-stack](https://github.com/EXAMPLE/homelab-books-stack) 
+- [homelab-media-stack](https://github.com/Archin3t/homelab-media-stack) 
+- [homelab-books-stack](https://github.com/Archin3t/homelab-books-stack) 
 
 ## Docs
 
-| File | Purpose |
-|---|---|
+| File (s) | Purpose |
+|------|------|------|
 | [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md) | System blueprint & design |
 | [docs/CREATION-GUIDE.md](docs/CREATION-GUIDE.md) | How to create the hypervisor guests |
 | [docs/USER-GUIDE.md](docs/USER-GUIDE.md) | Which service to open for which job |
-| [site/index.html](site/index.html) | Single-page HTML manual |
+| [site/index.html](docs/SECURITY.md) | Security Policy & Practices |
+| [site/index.html](Static-Site-View/index.html) | Single-page HTML manual |
 
 ## Safety
 
@@ -29,4 +32,4 @@ Documentation provided as-is for educational / Homelab use. Not affiliated with 
 Do not take this/make content of this repository without crediting me first: 
 | - [Instagram](https://www.instagram.com/archin3t) |
 | - [YouTube](https://www.youtube.com/@Archinet-Labs) |
-| - [GitHub](https://github.com/Archin3t) (Obviously) |
+| - [GitHub](https://github.com/Archin3t) |
