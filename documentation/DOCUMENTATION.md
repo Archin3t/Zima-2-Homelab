@@ -1,101 +1,107 @@
-# System Documentation — Homelab Blueprint
+
+---
+
+### 2 — `documentation/DOCUMENTATION.md`
+
+```markdown
+# System Documentation — ZimaBoard 2 Homelab Blueprint
 
 ## 1. Purpose
 
-A single-node Homelab that separates concerns:
+A single-node Homelab that separates concerns so one failure/domain doesn’t own everything:
 
 | Role | Responsibility |
-|---|---|
+|------|----------------|
 | Hypervisor | Proxmox VE on the host |
-| Media player | Jellyfin (or similar) |
-| Media automation | Request UI + Sonarr/Radarr + indexers + torrent client |
-| NAS (optional) | File shares / backup target (e.g. OpenMediaVault) |
-| Books / reading | Separate guest with its own disk (Kavita + Calibre stack) |
+| Media player | Jellyfin (stream movies/TV) |
+| Media automation | Jellyseerr + Sonarr/Radarr + Prowlarr + qBittorrent |
+| Books / reading | Kavita + Calibre-Web Automated (+ optional LazyLibrarian) on **separate disk** |
+| NAS (optional) | OpenMediaVault / shares / backup target |
 
-## 2. Hardware profile (example)
+App install details: **[ZimaBoard-Media-Stack](https://github.com/Archin3t/ZimaBoard-Media-Stack)** and **[ZimaBoard-NAS-Platform](https://github.com/Archin3t/ZimaBoard-NAS-Platform)**.
 
-Values below are **examples**. Size to your board.
+## 2. Reference hardware — ZimaBoard 2 1664
 
-| Resource | Example |
-|---|---|
-| Platform | Low-power x86 SBC / mini PC (e.g. Intel N-series) |
-| RAM | 16 GB class |
-| Boot disk | Small internal eMMC/SSD for hypervisor OS only |
-| Guest disk pool | Larger HDD/SSD for VM/LXC disks |
-| Media volume | Large external/internal disk dedicated to movies/TV |
+| Resource | This build |
+|----------|------------|
+| Platform | IceWhale ZimaBoard 2 1664 (x86) |
+| CPU | Intel N150 |
+| RAM | 16 GB |
+| Boot disk | 64 GB eMMC — Proxmox only |
+| Guest disk pool | Larger SATA/USB/NVMe pool for VM/LXC disks |
+| Media volume | Large dedicated disk/USB for movies/TV/downloads |
 | Books volume | Space **inside** the books guest disk (not on media volume) |
-| GPU | Integrated Intel graphics for VAAPI transcoding (optional) |
+| GPU | Intel iGPU → optional `/dev/dri` to Jellyfin for VAAPI |
 
-## 3. Guest map (logical)
+**Portable ideas:** any low-power x86 with 16 GB RAM can follow this layout. More RAM = happier concurrent transcodes + more guests.
 
-Assign your own IDs, names, and addresses.
+## 3. Guest map (logical template)
+
+Assign your own IDs, names, and addresses privately.
 
 | Guest role | Type (example) | Notes |
-|---|---|---|
-| Media player | LXC or VM | Bind-mount media volume; optional GPU passthrough/`/dev/dri` |
-| Media automation | LXC or VM | Same media volume for hardlinks with the download client |
-| NAS | VM (common) | Optional passthrough disk for shares |
-| Books | LXC or VM | **Own disk**; do not share the media library disk |
+|------------|----------------|-------|
+| Media player | LXC or VM | Bind-mount media volume; optional GPU |
+| Media automation | LXC (nesting) or VM | **Same** media mount path as player (hardlinks) |
+| Books | LXC (nesting) or VM | Own large disk; do not mount media library |
+| NAS | VM (common) | Passthrough or virtio data disk |
+
+Example starting resources (tune to taste):
+
+| Guest | vCPU | RAM | OS disk | Extra |
+|-------|------|-----|---------|--------|
+| Player | 2 | 2–4 GB | 8–16 GB | media bind + `/dev/dri` |
+| Automation | 2 | 2–4 GB | 8–16 GB | media bind |
+| Books | 2 | 2–4 GB | **64–256 GB** | Docker/compose OK |
+| NAS | 1–2 | 1–2 GB | 16–32 GB | data disk passthrough |
 
 ## 4. Network (generic)
 
-- Private LAN only unless you add a reverse proxy + TLS intentionally.
-- Give each guest a **static address you choose**.
-- Document your map **privately** (password manager / Homelab wiki) — not in public git.
-
-Example placeholder table (fill locally, never commit real values to a public repo):
+- Private LAN unless you deliberately add reverse proxy + TLS  
+- Static IP or DHCP reservation per guest  
+- Keep the real map in a password manager / private wiki — **not** public git  
 
 | Role | Placeholder |
-|---|---|
-| Hypervisor UI | `https://<PROXMOX_HOST>:8006` |
-| Media player | `http://<JELLYFIN_HOST>:8096` |
+|------|-------------|
+| Hypervisor | `https://<PROXMOX_HOST>:8006` |
+| Player | `http://<JELLYFIN_HOST>:8096` |
 | Request UI | `http://<MEDIA_STACK_HOST>:5055` |
+| Download client | `http://<MEDIA_STACK_HOST>:8080` |
+| *arr | Sonarr `:8989` · Radarr `:7878` · Prowlarr `:9696` |
 | Books reader | `http://<BOOKS_HOST>:5000` |
+| Book tools | CWA `:8083` · LazyLibrarian `:5299` |
+| NAS | `http://<NAS_HOST>` |
 
 ## 5. Storage philosophy
 
 | Data | Where | Why |
-|---|---|---|
-| Hypervisor OS | Boot device | Keep small and rebuildable |
+|------|-------|-----|
+| Hypervisor OS | eMMC / boot device | Small, rebuildable |
 | Guest virtual disks | Guest storage pool | Snapshots/backups |
-| Movies / TV / torrent completes | Dedicated media volume | Large, shared by player + automation |
-| Books / textbooks | Books guest disk | Isolation from media server |
+| Movies / TV / torrent completes | Dedicated media volume | Shared by player + automation |
+| Books / textbooks | Books guest disk | Isolated from media churn |
+| NAS shares | NAS data disk | User files / backups |
 
-**Mount media volumes by LABEL or `/dev/disk/by-id/...`**, never by unstable `/dev/sdX` letters.
+**Mount by LABEL or `/dev/disk/by-id/...` — never `/dev/sdX`.**
+
+Bind-mount media into player + automation at the **same absolute path** (example: `/mnt/media`) so hardlinks work.
 
 ## 6. How stacks connect
 
 ```text
                     +------------------+
-                    |   Homelab host   |
+                    |  ZimaBoard host  |
                     |    (Proxmox)     |
                     +--------+---------+
                              |
-        +--------------------+--------------------+
-        |                    |                    |
-        v                    v                    v
- +--------------+    +---------------+    +--------------+
- | Media player |    | Media stack   |    | Books stack  |
- | (Jellyfin)   |    | (request/*arr)|    | (Kavita/...) |
- +------+-------+    +-------+-------+    +------+-------+
-        ^                    |                   |
-        |          shared media volume           |
-        +--------------------+                   |
-                             |            own disk only
-                             v
-                    +----------------+
-                    | Media files    |
-                    +----------------+
-```
-
-## 7. Related projects
-
-- **Media stack** — creation + user guides for playback/automation
-- **Books stack** — creation + user guides for reading libraries
-
-## 8. Out of scope for this repo
-
-- Exact package versions pinned to one build
-- Router/firewall vendor configs
-- Credentials, API keys, personal inventory
-- Public exposure / Cloudflare tunnels (document separately if you add them)
+     +-----------+-----------+-----------+-----------+
+     |           |           |           |           |
+     v           v           v           v           v
+ Jellyfin    Media stack   Books      NAS (opt)   (future)
+ (player)    (*arr/qBit)   (Kavita)   (OMV)
+     ^           |           |
+     |    shared media disk  | own disk
+     +-----------+           v
+                 |      book library
+                 v
+           media files
