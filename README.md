@@ -25,7 +25,7 @@ This repository describes **architecture and roles**. Application install detail
 | [documentation/CREATION-GUIDE.md](documentation/CREATION-GUIDE.md) | How to create the hypervisor guests |
 | [documentation/USER-GUIDE.md](documentation/USER-GUIDE.md) | Which service to open for which job |
 | [documentation/SECURITY](documentation/SECURITY.md) | Security Policy & Practices |
-| [docs/index.html](docs/index.html) | Single-page HTML manual |
+| [docs/index.html](https://archin3t.github.io/ZimaBoard-2-Homelab/) | Single-page HTML manual |
 
 ## Safety
 
