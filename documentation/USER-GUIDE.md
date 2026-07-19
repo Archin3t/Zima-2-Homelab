@@ -1,4 +1,4 @@
-# User Guide — ZimaBoard 2 Homelab Blueprint
+# User Guide — ZimaBoard 2 Homelab
 
 This guide covers everyday use and basic troubleshooting.
 
