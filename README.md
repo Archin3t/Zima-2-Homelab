@@ -1,4 +1,4 @@
-# Homelab Blueprint
+# ZimaBoard 2 Homelab Blueprint
 
 Public documentation for a **small Proxmox-based Homelab**: media streaming, optional NAS, and a separate books/reading stack.
 
