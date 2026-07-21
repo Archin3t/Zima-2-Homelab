@@ -108,11 +108,11 @@ Scale storage and memory as needed while keeping workload separation intact.
 
 | File | Purpose |
 |------|---------|
-| **[DOCUMENTATION.md)](https://github.com/Archin3t/ZimaBoard-2-Homelab/documentation/DOCUMENTATION.md)** | Complete platform architecture and technical documentation |
-| **[CREATION-GUIDE.md)](https://github.com/Archin3t/ZimaBoard-2-Homelab/documentation/CREATION-GUIDE.md)** | Recommended build order from bare hardware to finished homelab |
-| **[USER-GUIDE.md)](https://github.com/Archin3t/ZimaBoard-2-Homelab/documentation/USER-GUIDE.md)** | Day-to-day administration, maintenance, updates, and troubleshooting |
-| **[SECURITY.md)](https://github.com/Archin3t/ZimaBoard-2-Homelab/documentation/SECURITY.md)** | Security practices, credential redaction, and privacy policy |
-| **[index.html)](https://github.com/Archin3t/ZimaBoard-2-Homelab/docs/index.html)** | Single-page HTML documentation for GitHub Pages |
+| **[DOCUMENTATION.md](https://github.com/Archin3t/ZimaBoard-2-Homelab/documentation/DOCUMENTATION.md)** | Complete platform architecture and technical documentation |
+| **[CREATION-GUIDE.md](https://github.com/Archin3t/ZimaBoard-2-Homelab/documentation/CREATION-GUIDE.md)** | Recommended build order from bare hardware to finished homelab |
+| **[USER-GUIDE.md](https://github.com/Archin3t/ZimaBoard-2-Homelab/documentation/USER-GUIDE.md)** | Day-to-day administration, maintenance, updates, and troubleshooting |
+| **[SECURITY.md](https://github.com/Archin3t/ZimaBoard-2-Homelab/documentation/SECURITY.md)** | Security practices, credential redaction, and privacy policy |
+| **[index.html](https://github.com/Archin3t/ZimaBoard-2-Homelab/docs/index.html)** | Single-page HTML documentation for GitHub Pages |
 
 ---
 
