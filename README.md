@@ -1,4 +1,4 @@
-# ZimaBoard 2 Homelab Blueprint
+# ZimaBoard 2 Homelab
 
 > **A documented, production-style single-node Proxmox homelab built around the IceWhale ZimaBoard 2 (1664).**  
 > Designed to be reproducible, hardware-agnostic, and easy to expand.
