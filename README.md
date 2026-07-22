@@ -15,7 +15,7 @@ To keep documentation organized, applications are split into dedicated repositor
 
 | Repository | Covers |
 |------------|--------|
-| **[ZimaBoard-Media-Stack](https://github.com/Archin3t/ZimaBoard-Media-Stack)** | Movies, TV, and Books — Jellyfin, Jellyseerr, Sonarr, Radarr, Prowlarr, qBittorrent, Kavita, Calibre-Web Automated, and LazyLibrarian |
+| **[ZimaBoard-Media-Stack](https://github.com/Archin3t/Homelab-Media-Stack)** | Movies, TV, and Books — Jellyfin, Jellyseerr, Sonarr, Radarr, Prowlarr, qBittorrent, Kavita, Calibre-Web Automated, and LazyLibrarian |
 | **[ZimaBoard-NAS (and Everything Else)](https://github.com/Archin3t/ZimaBoard-NAS)** | NAS, OpenMediaVault, storage passthrough, SMB/NFS shares, backups, maintenance, and additional services |
 
 ---
